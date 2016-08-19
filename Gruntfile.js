@@ -1,4 +1,3 @@
-// Generated on 2015-06-22 using generator-chrome-extension 0.3.1
 'use strict';
 
 // # Globbing
@@ -21,6 +20,8 @@ module.exports = function (grunt) {
     dist: 'dist'
   };
 
+  var path = require('path');
+
   grunt.initConfig({
 
     // Project settings
@@ -28,10 +29,6 @@ module.exports = function (grunt) {
 
     // Watches files for changes and runs tasks based on the changed files
     watch: {
-      bower: {
-        files: ['bower.json'],
-        tasks: ['bowerInstall']
-      },
       js: {
         files: ['<%= config.app %>/scripts/{,*/}*.js'],
         tasks: ['jshint'],
@@ -127,11 +124,107 @@ module.exports = function (grunt) {
     },
 
     // Automatically inject Bower components into the HTML file
-    bowerInstall: {
+    wiredep: {
       app: {
         src: [
-          '<%= config.app %>/*.html'
+          '<%= config.app %>/background.html'
         ]
+      }
+    },
+
+    curl: {
+      geolite2: {
+        src: 'http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country-CSV.zip',
+        dest: '.tmp/geolite2.zip',
+      }
+    },
+
+    unzip: {
+      geolite2: {
+        router: function (filepath) {
+          var extname = path.extname(filepath);
+
+          if (extname === '.csv') {
+            return path.basename(filepath);
+          } else {
+            return null;
+          }
+        },
+        src: '.tmp/geolite2.zip',
+        dest: '<%= config.dist %>/geolite2/',
+      }
+    },
+
+    convert: {
+      blocks: {
+        options: {
+          csv: {
+            columns: [
+              'network',
+              'geoname_id'
+            ]
+          }
+        },
+        files: [
+          {
+            expand: true,
+            cwd: '<%= config.dist %>/geolite2/',
+            src: ['GeoLite2-Country-Blocks-*.csv'],
+            dest: '<%= config.dist %>/geolite2/',
+            ext: '.json'
+          }
+        ]
+      },
+      locations: {
+        files: [
+          {
+            expand: true,
+            cwd: '<%= config.dist %>/geolite2/',
+            src: ['GeoLite2-Country-Locations-*.csv'],
+            dest: '<%= config.dist %>/geolite2/',
+            ext: '.json'
+          }
+        ]
+      }
+    },
+
+    minjson: {
+      compile: {
+        files: { // Does not support folders as destination
+          '<%= config.dist %>/geolite2/GeoLite2-Country-Blocks-IPv4.json': '<%= config.dist %>/geolite2/GeoLite2-Country-Blocks-IPv4.json',
+          '<%= config.dist %>/geolite2/GeoLite2-Country-Blocks-IPv6.json': '<%= config.dist %>/geolite2/GeoLite2-Country-Blocks-IPv6.json',
+          '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-de.json': '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-de.json',
+          '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-en.json': '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-en.json',
+          '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-es.json': '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-es.json',
+          '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-fr.json': '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-fr.json',
+          '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-ja.json': '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-ja.json',
+          '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-pt-BR.json': '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-pt-BR.json',
+          '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-ru.json': '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-ru.json',
+          '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-zh-CN.json': '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-zh-CN.json'
+        }
+      }
+    },
+
+    'string-replace': {
+      blocks: {
+        src: '<%= config.dist %>/geolite2/GeoLite2-Country-Blocks-*.json',
+        dest: '<%= config.dist %>/geolite2/',
+        options: {
+          replacements: [{
+            pattern: /."network":"network","geoname_id":"geoname_id".,/,
+            replacement: ''
+          }]
+        }
+      },
+      locations: {
+        src: '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-*.json',
+        dest: '<%= config.dist %>/geolite2/',
+        options: {
+          replacements: [{
+            pattern: /"locale_code":"en",/g,
+            replacement: ''
+          }]
+        }
       }
     },
 
@@ -144,7 +237,8 @@ module.exports = function (grunt) {
       },
       html: [
         '<%= config.app %>/popup.html',
-        '<%= config.app %>/options.html'
+        '<%= config.app %>/options.html',
+        '<%= config.app %>/background.html'
       ]
     },
 
@@ -241,7 +335,6 @@ module.exports = function (grunt) {
             'styles/{,*/}*.css',
             'styles/fonts/{,*/}*.*',
             '_locales/{,*/}*.json',
-            'geolite2/*.json' // TODO - get form an S3 bucket ?
           ]
         }]
       }
@@ -263,7 +356,7 @@ module.exports = function (grunt) {
     chromeManifest: {
       dist: {
         options: {
-          buildnumber: true,
+          buildnumber: false,
           indentSize: 2,
           background: {
             target: 'scripts/background.js',
@@ -315,7 +408,12 @@ module.exports = function (grunt) {
     'chromeManifest:dist',
     'useminPrepare',
     'concurrent:dist',
-    'cssmin',
+    'curl',
+    'unzip',
+    //'cssmin',
+    'convert',
+    'minjson',
+    'string-replace',
     'concat',
     'uglify',
     'copy',
