@@ -103,9 +103,20 @@ module.exports = function (grunt) {
         files: [{
           dot: true,
           src: [
-            '.tmp'
+            '.tmp',
+            '<%= config.app %>/scripts/background2.js'
           ]
         }]
+      }
+    },
+
+    browserify: {
+      build: {
+        src: ['<%= config.app %>/scripts/background.js'],
+        dest: '<%= config.app %>/scripts/background2.js',
+        options: {
+          debug: true
+        }
       }
     },
 
@@ -240,7 +251,7 @@ module.exports = function (grunt) {
         options: {
           replacements: [
             {
-              pattern: /"locale_code":"en",/g,
+              pattern: /"locale_code":"(.*?)",/g,
               replacement: ''
             },
             {
@@ -248,8 +259,8 @@ module.exports = function (grunt) {
               replacement: '"id":'
             },
             {
-              pattern: /"country_iso_code":/g,
-              replacement: '"country_code":'
+              pattern: /"continent_code":"(.*?)","continent_name":"(.*?)","country_iso_code":"(.*?)","country_name":"(.*?)"/g,
+              replacement: '"continent":{"code":"$1","name":"$2"},"country":{"code":"$3","name":"$4"}'
             }
           ]
         }
@@ -432,6 +443,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'clean:dist',
+    'browserify',
     'chromeManifest:dist',
     'useminPrepare',
     'concurrent:dist',
