@@ -1,6 +1,9 @@
-# GeoFlag for Chrome
+chrome-geoflag-ng
+=================
 
-GeoFlag is a open source [Google Chrome](https://www.google.com/chrome/browser/desktop/) extension which shows a flag in the address bar based on the current website's server location. It has a number of features which help it stand out from all the other flag extensions.
+Fork of [chrome-geoflag](https://github.com/jacobgelling/chrome-geoflag).
+
+GeoFlag NG is a open source [Google Chrome](https://www.google.com/chrome/browser/desktop/) extension which shows a flag in the address bar based on the current website's server location. It has a number of features which help it stand out from all the other flag extensions.
 
  - IPv6 compatible
  - Lookups done locally
@@ -8,28 +11,26 @@ GeoFlag is a open source [Google Chrome](https://www.google.com/chrome/browser/d
  - Hides on local sites
  - No tracking
 
-### Version
+Installation
+------------
 
-1.0.3
+Build coming Soon™
 
-### Installation
+Contributing
+------------
 
-[![Available in the Chrome Web Store](https://developer.chrome.com/webstore/images/ChromeWebStore_BadgeWBorder_v2_206x58.png)](https://chrome.google.com/webstore/detail/geoflag/jidjgfepnmonpcmaihbifgjkbilkipoh)
-
-Alternatively you can download the GeoFlag extension from https://github.com/jacobg830/chrome-geoflag/releases and install it manually.
-
-### Contributing
-GeoFlag is using yeoman scaffolding , bower & grunt as task runners. Starting you need to get the required packages for node & bower.
+GeoFlag NG is using Grunt as a task runners. You need to get the required packages for Node.
 
 ```bash
-$ npm install && bower install 
+$ npm install
 # Run grunt debug - this runs a reload task 
 $ grunt debug # note that the loaded extension path should be /chrome-geoflag/app/
 # Happy with the changes ? Now to build the extension for release
 $ grunt build
 ```
 
-### License
+License
+-------
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 

@@ -1,9 +1,9 @@
 {
-  "name": "__MSG_description__",
+  "name": "GeoFlag NG",
   "version": "1.0.3",
   "manifest_version": 2,
   "description": "__MSG_description__",
-  "homepage_url": "https://github.com/jacobg830/chrome-geoflag",
+  "homepage_url": "https://github.com/gcavallo/chrome-geoflag",
   "minimum_chrome_version": "37",
   "icons": {
     "16": "img/icons/icon16.png",
@@ -17,7 +17,7 @@
   },
   "page_action": {
     "default_icon": "img/icons/icon19.png",
-    "default_title": "GeoFlag",
+    "default_title": "GeoFlag NG",
     "default_popup": "popup.html"
   },
   "permissions": [
