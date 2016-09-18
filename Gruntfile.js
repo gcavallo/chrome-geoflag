@@ -14,6 +14,8 @@ module.exports = function (grunt) {
     dist: 'dist'
   };
 
+  grunt.loadTasks('tasks');
+
   var path = require('path');
 
   grunt.initConfig({
@@ -89,8 +91,6 @@ module.exports = function (grunt) {
           dot: true,
           src: [
             '.tmp',
-            '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-pt-BR.json',
-            '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-zh-CN.json',
           ]
         }]
       }
@@ -130,119 +130,14 @@ module.exports = function (grunt) {
     // Download GeoLite2 to temporary folder
     curl: {
       geolite2: {
-        src: 'http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country-CSV.zip',
-        dest: '.tmp/geolite2.zip',
+        src: 'http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.mmdb.gz',
+        dest: '.tmp/GeoLite2-Country.mmdb.gz',
       }
     },
-    unzip: {
+    gz: {
       geolite2: {
-        router: function (filepath) {
-          var extname = path.extname(filepath);
-
-          if (extname === '.csv') {
-            return path.basename(filepath);
-          } else {
-            return null;
-          }
-        },
-        src: '.tmp/geolite2.zip',
-        dest: '.tmp/geolite2/',
-      }
-    },
-
-    // Convert CSV to JSON
-    convert: {
-      blocks: {
-        options: {
-          csv: {
-            columns: [
-              'network',
-              'geoname_id'
-            ]
-          }
-        },
-        files: [
-          {
-            expand: true,
-            cwd: '.tmp/geolite2/',
-            src: ['GeoLite2-Country-Blocks-*.csv'],
-            dest: '<%= config.dist %>/geolite2/',
-            ext: '.json'
-          }
-        ]
-      },
-      locations: {
-        files: [
-          {
-            expand: true,
-            cwd: '.tmp/geolite2/',
-            src: ['GeoLite2-Country-Locations-*.csv'],
-            dest: '<%= config.dist %>/geolite2/',
-            ext: '.json'
-          }
-        ]
-      }
-    },
-
-    // Minimize JSON
-    minjson: {
-      compile: {
-        files: { // Does not support folders as destination
-          '<%= config.dist %>/geolite2/GeoLite2-Country-Blocks-IPv4.json': '<%= config.dist %>/geolite2/GeoLite2-Country-Blocks-IPv4.json',
-          '<%= config.dist %>/geolite2/GeoLite2-Country-Blocks-IPv6.json': '<%= config.dist %>/geolite2/GeoLite2-Country-Blocks-IPv6.json',
-          '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-de.json': '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-de.json',
-          '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-en.json': '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-en.json',
-          '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-es.json': '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-es.json',
-          '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-fr.json': '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-fr.json',
-          '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-ja.json': '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-ja.json',
-          '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-pt.json': '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-pt-BR.json',
-          '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-ru.json': '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-ru.json',
-          '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-zh.json': '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-zh-CN.json'
-        }
-      }
-    },
-
-    // Optimize JSON
-    'string-replace': {
-      blocks: {
-        src: '<%= config.dist %>/geolite2/GeoLite2-Country-Blocks-*.json',
-        dest: '<%= config.dist %>/geolite2/',
-        options: {
-          replacements: [
-            {
-              pattern: /."network":"network","geoname_id":"geoname_id".,/,
-              replacement: ''
-            },
-            {
-              pattern: /"network":/g,
-              replacement: '"ip":'
-            },
-            {
-              pattern: /"geoname_id":/g,
-              replacement: '"id":'
-            }
-          ]
-        }
-      },
-      locations: {
-        src: '<%= config.dist %>/geolite2/GeoLite2-Country-Locations-*.json',
-        dest: '<%= config.dist %>/geolite2/',
-        options: {
-          replacements: [
-            {
-              pattern: /"locale_code":"(.*?)",/g,
-              replacement: ''
-            },
-            {
-              pattern: /"geoname_id":/g,
-              replacement: '"id":'
-            },
-            {
-              pattern: /"continent_code":"(.*?)","continent_name":"(.*?)","country_iso_code":"(.*?)","country_name":"(.*?)"/g,
-              replacement: '"continent":{"code":"$1","name":"$2"},"country":{"code":"$3","name":"$4"}'
-            }
-          ]
-        }
+        src: '.tmp/GeoLite2-Country.mmdb.gz',
+        dest: '<%= config.dist %>/geolite2/GeoLite2-Country.mmdb',
       }
     },
 
@@ -363,11 +258,8 @@ module.exports = function (grunt) {
     'imagemin',
     'svgmin',
     'curl',
-    'unzip',
+    'gz',
     //'cssmin',
-    'convert',
-    'minjson',
-    'string-replace',
     'concat',
     'uglify',
     'copy',
